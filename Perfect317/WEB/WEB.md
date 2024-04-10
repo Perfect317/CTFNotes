@@ -1,3 +1,7 @@
+---
+typora-copy-images-to: ./..\images
+---
+
 # 1.WEB
 
 ## 1.Json数据格式
@@ -79,12 +83,14 @@ $data2="\xd1\x31\xdd\x02\xc5\xe6\xee\xc4\x69\x3d\x9a\x06\x98\xaf\xf9\x5c\x2f\xca
 
 
 
-`ffifdyop` 这个字符串被 md5 哈希了之后会变成 `276f722736c95d99e921722cf9ed621c`，这个字符串前几位刚好是 ' `or '6`
-而 Mysql 刚好又会把 hex 转成 ascii 解释，因此拼接之后的形式是 `select * from 'admin' where password='' or '6xxxxx'`，等价于 or 一个永真式，因此相当于万能密码，可以绕过md5()函数。
+ffifdyop 这个字符串被 md5 哈希了之后会变成 276f722736c95d99e921722cf9ed621c，这个字符串前几位刚好是 ' or '6
+而 Mysql 刚好又会把 hex 转成 ascii 解释，因此拼接之后的形式是 select * from 'admin' where password='' or '6xxxxx'，等价于 or 一个永真式，因此相当于万能密码，可以绕过md5()函数。
 
 ### $a==md5($a)
 
 ## 3.php伪协议
+
+#### file函数
 
 ![img](https://img-blog.csdnimg.cn/20210110135324804.png)
 
@@ -94,9 +100,35 @@ $data2="\xd1\x31\xdd\x02\xc5\xe6\xee\xc4\x69\x3d\x9a\x06\x98\xaf\xf9\x5c\x2f\xca
 4.是必选参数，后面写你要处理的文件名
 
 php://filter/read=convert.base64-encode/resource=index.php
+
+php://filter/convert.base64-encode/resource=index.php
+
+在绕过一些WAF时有用
+
+
+
 php://filter/resource=index.php
 
 
+
+#### data命令
+
+text=data://text:text/plain,+内容
+
+
+
+file:// — 访问本地文件系统
+http:// — 访问 HTTP(s) 网址
+ftp:// — 访问 FTP(s) URLs
+php:// — 访问各个输入/输出流（I/O streams）
+zlib:// — 压缩流
+data:// — 数据（RFC 2397）
+glob:// — 查找匹配的文件路径模式
+phar:// — PHP 归档
+ssh2:// — Secure Shell 2
+rar:// — RAR
+ogg:// — 音频流
+expect:// — 处理交互式的流
 
 ## 4.文件上传漏洞
 
@@ -178,11 +210,41 @@ web，website，backup，back，www，wwwroot，temp
 
 python dirsearch.py -u 网址
 
-## 6.waf绕过
+## 6.过滤绕过 RCE漏洞
+
+### 1.与RCE相关的危险函数 
+
+ eval()  将字符串当作php代码执行
+ assert()  将字符串当作php代码执行
+ preg_replace()  将字符串正则匹配后替换
+ call_user_func()  回调函数
+ array_map()   回调函数
+
+
+
+使用print_r()进行输出
+
+使用readfile()或highlight_file()读取文件
+
+highlight_file() 函数对文件进行语法高亮显示，本函数是show_source() 的别名
+
+next() 输出数组中的当前元素和下一个元素的值。
+
+array_reverse() 函数以相反的元素顺序返回数组。(主要是能返回值)
+
+scandir() 函数返回指定目录中的文件和目录的数组。
+
+pos() 输出数组中的当前元素的值。
+
+localeconv() 函数返回一个包含本地数字及货币格式信息的数组，该数组的第一个元素就是"."。
 
 scandir（）用来获取目录文件
 
-chr（47）是`/`的ASCII编码，因为`/`被过滤了
+chr（47）是/的ASCII编码，因为/被过滤了
+
+
+
+exp=highlight_file(next(array_reverse(scandir(pos(localeconv())))))
 
 ## 7.get传数组
 
@@ -236,7 +298,7 @@ Cache-Control：控制缓存行为的指令。用于指定客户端和代理服�
 
 
 
-**`X-Forwarded-For`**（XFF）请求标头是一个事实上的用于标识通过代理服务器连接到 web 服务器的客户端的原始 IP 地址的标头。
+**X-Forwarded-For**（XFF）请求标头是一个事实上的用于标识通过代理服务器连接到 web 服务器的客户端的原始 IP 地址的标头。
 
 
 
@@ -251,7 +313,7 @@ session是认证用户身份的凭证
 
 Cookies和secure cookies
 
-普通的cookie并不安全, 可以通过客户端修改. 如果你需要通过设置cookie, 例如来识别当前登录的用户, 就需要给你的cookie签名防止伪造. Tornado 支持通过 [`set_secure_cookie`](https://tornado-zh.readthedocs.io/zh/latest/web.html#tornado.web.RequestHandler.set_secure_cookie) 和 [`get_secure_cookie`](https://tornado-zh.readthedocs.io/zh/latest/web.html#tornado.web.RequestHandler.get_secure_cookie) 方法对cookie签名
+普通的cookie并不安全, 可以通过客户端修改. 如果你需要通过设置cookie, 例如来识别当前登录的用户, 就需要给你的cookie签名防止伪造. Tornado 支持通过 [set_secure_cookie](https://tornado-zh.readthedocs.io/zh/latest/web.html#tornado.web.RequestHandler.set_secure_cookie) 和 [get_secure_cookie](https://tornado-zh.readthedocs.io/zh/latest/web.html#tornado.web.RequestHandler.get_secure_cookie) 方法对cookie签名
 
 ------
 
@@ -323,7 +385,177 @@ dump class文件进行反编译。
 
 ![image-20240331231416487](../images/image-20240331231416487.png)
 
-# 2.SQL注入
+## 11.nmap
+
+nmap是一款非常强大的主机发现和端口扫描工具，而且nmap运用自带的脚本，还能完成漏洞检测，同时支持多平台。
+
+nmap常用命令
+主机发现 
+
+iR                                                                随机选择目标
+
+-iL                                                                从文件中加载IP地址
+
+-sL                                                               简单的扫描目标
+
+-sn                                                               Ping扫描-禁用端口扫描
+
+-Pn                                                              将所有主机视为在在线，跳过主机发现
+
+-PS[portlist]                                              （TCP SYN ping） 需要root权限
+
+-PA[portlist]                                              （TCP ACK ping）
+
+-PU[portlist]                                              （UDP  ping）
+
+-PY [portlist]                                             （SCTP ping）
+
+-PE/PP/PM                                                 ICMP回显，时间戳和网络掩码请求探测
+
+-PO[协议列表]                                            IP协议Ping
+
+-n/-R                                                           从不执行DNS解析/始终解析[默认：有时]
+
+--dns-servers                                              指定自定义DNS服务器
+
+--system-dns                                              使用OS的dns服务器
+
+--traceroute                                                跟踪到每个主机的跃点路径
+
+扫描技术
+
+-sS                                                             使用TCP的SYN进行扫描
+
+-sT                                                             使用TCP进行扫描
+
+-sA                                                            使用TCP的ACK进行扫描
+
+-sU                                                            UDP扫描
+
+-sI                                                             Idle扫描
+
+-sF                                                            FIN扫描
+
+-b<FTP中继主机>                                     FTP反弹扫描
+
+端口规格和扫描顺序
+
+-p                                                              扫描指定端口
+
+--exclude-ports                                         从扫描中排除指定端口
+
+-f                                                               快速模式-扫描比默认扫描更少的端口
+
+-r                                                               连续扫描端口-不随机化
+
+--top-ports                                                 扫描<number>最常用的端口
+
+服务/版本探测
+
+-sV                                                            探测服务/版本信息
+
+--version-intensity                                     设置版本扫描强度（0-9）
+
+--version-all                                              尝试每个强度探测
+
+--version-trace                                          显示详细的版本扫描活动（用于调试）
+
+脚本扫描
+
+-SC                                                           等效于 --script=defult
+
+--script = <lua scripts>,<lua scripts>        以逗号分隔的目录，脚本文件或脚本类别
+
+--script-args = <n1=v1, n2=v2>               为脚本提供参数
+
+--script-args-file=文件名                          从文件名中加载脚本参数
+
+--script-trace                                            显示发送和接受的所有数据
+
+--script-updatedb                                     更新脚本数据库
+
+--script-help=<lua scripts>                      显示有关脚本的帮助
+
+操作系统检测
+
+-o                                                            启用os检测
+
+--osscan-limit                                          将os检测限制为可能的目标
+
+--osscan-guess                                       推测操作系统检测结果
+
+时间和性能
+
+--host-timeout                                         设置超时时间
+
+--scan-delay                                           设置探测之间的时间间隔
+
+-T  <0-5>                                                设置时间模板,值越小，IDS报警几率越低
+
+防火墙/IDS规避和欺骗
+
+-f                                                             报文分段
+
+-s                                                             欺骗源地址
+
+-g                                                            使用指定的本机端口
+
+--proxies <url,port>                                 使用HTTP/SOCK4代理
+
+-data<hex string>                                   想发送的数据包中追加自定义的负载
+
+--data-string                                            将自定义的ACSII字符串附加到发送数据包中   
+
+--data-length                                           发送数据包时，附加随机数据
+
+--spoof-mac                                            MAC地址欺骗
+
+--badsum                                                发送带有虚假TCP/UNP/STCP校验和的数据包
+
+输出
+
+-oN                                                         标准输出
+
+-oX                                                         XMl输出
+
+-oS                                                         script jlddi3
+
+-oG                                                        grepable
+
+-oA                                                         同时输出三种主要格式
+
+-v                                                           信息详细级别
+
+-d                                                           调试级别
+
+--packet-trace                                        跟踪发送和接收的报文
+
+--reason                                                 显示端口处于特殊状态的原因
+
+--open                                                    仅显示开放的端口
+
+杂项
+
+-6                                                          启动Ipv6扫描
+
+-A                                                          启动Os检测，版本检测，脚本扫描和traceroute
+
+-V                                                          显示版本号
+
+-h                                                          帮助信息
+————————————————
+
+原文链接：https://blog.csdn.net/smli_ng/article/details/105964486
+
+## 12.目录扫描
+
+dirseach 
+
+dirsearch -u url
+
+
+
+#  2.SQL注入
 
 ## 1.过滤
 
@@ -409,21 +641,7 @@ geekuser,l0ve1ysq1
 
 
 
-# 3.PHP命令执行
-
-
-
-file命令
-
-text=file://+路径
-
-data命令
-
-text=data://text:text/plain,+内容
-
-
-
-## 2.is_numeric函数
+# **3.PHP命令执行**
 
 ## 1.读取文件内容
 
@@ -450,6 +668,68 @@ text=data://text:text/plain,+内容
 ### 思路2：
 
 转换为16进制字符串
+
+## 3.执行指定的代码
+
+```php
+<?php
+$id = $_GET['id'];
+$_SESSION['id'] = $id;
+
+function complex($re, $str) {
+    return preg_replace(
+        '/(' . $re . ')/ei',
+        'strtolower("\\1")',
+        $str
+    );
+}
+
+
+foreach($_GET as $re => $str) {
+    echo complex($re, $str). "\n";
+}
+
+function getFlag(){
+    @eval($_GET['cmd']);
+}
+
+```
+
+只需要执行getflag（）函数，并且传入cmd参数
+
+(url).../next.php?id=1&\S*={${getFlag()}}&cmd=system('linux命令');
+
+正则表达式\S*表示匹配非空字符串
+
+匹配到的是getFlag这个函数
+
+然后传入cmd参数
+
+## 3.escapeshellarg || escapeshellcmd
+
+escapeshellarg 将字符串转码为可以在shell命令中使用的参数，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用
+
+escapeshellcmd对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。 此函数保证用户输入的数据在传送到 exec() 或 system() 函数，或者 执行操作符 之前进行转义。
+
+- [ ] 传入的参数是：172.17.0.2<font color=red>**'**</font> -v -d a=1
+
+- [ ] 经过escapeshellarg处理后变成了<font color=pink>**'**</font>>172.17.0.2<font color=pink>**'**</font><font color=red>**\\'**</font><font color=blue>**'** </font>>-v -d a=1<font color=blue>**'**</font>>，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用。
+
+- [ ] 经过escapeshellcmd处理后变成'172.17.0.2'\\\\'' -v -d a=1\'，这是因为escapeshellcmd对\以及最后那个不配对儿的引号进行了转义：http://php.net/manual/zh/function.escapeshellcmd.php
+
+- [ ] 最后执行的命令是curl '172.17.0.2'\\\\'' -v -d a=1\'，由于中间的\\被解释为\而不再是转义字符，所以后面的'没有被转义，与再后面的'配对儿成了一个空白连接符。所以可以简化为curl 172.17.0.2\ -v -d a=1'，即向172.17.0.2\发起请求，POST 数据为a=1'。
+
+# 4.源码泄露
+
+https://www.secpulse.com/archives/124398.html
+
+## 1.GitHack
+
+GitHack.py是基于python3的语法
+
+dirsearch扫描目录 发现/.git/下有源码泄露
+
+python GitHack.py url../.git/
 
 
 

