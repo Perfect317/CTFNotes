@@ -88,6 +88,8 @@ ffifdyop 这个字符串被 md5 哈希了之后会变成 276f722736c95d99e921722
 
 ### $a==md5($a)
 
+0e215962017
+
 ## 3.php伪协议
 
 #### file函数
@@ -209,6 +211,10 @@ web，website，backup，back，www，wwwroot，temp
  可以使用dirsearch扫描 在D:\Program\PYthon\Python\dirsearch-master目录下
 
 python dirsearch.py -u 网址
+
+python dirsearch.py -e bak,zip,tgz,txt,php -u https://target -t 30
+
+扫描指定后缀名的文件
 
 ## 6.过滤绕过 RCE漏洞
 
@@ -553,6 +559,36 @@ dirseach
 
 dirsearch -u url
 
+## 13.XXE漏洞
+
+```xml
+<?xml version = "1.0"?>
+<!DOCTYPE note[ <!ENTITY cc "aa"> ]>
+<na>&cc;</na>
+```
+
+```xml
+<?xml version = "1.0"?>
+<!DOCTYPE ANY[ <!ENTITY f SYSTEM "file:///C://Windows//win/ini"> ]>
+<x>&f;</x>
+```
+
+```xml
+<?xml version = "1.0"?>
+<!DOCTYPE ANY[ <!ENTITY admin SYSTEM "file:///C://Windows//win/ini"> ]>
+<user><username>&admin;</username><password> admin</password></user> 
+```
+
+## 14.phpmyadmin 4.8.1 远程文件包含漏洞
+
+总结：
+
+利用phpMyAdmin 4.8.1后台文件包含漏洞，获取登录phpmyadmin系统所产生的sess_sessionID文件，然后通过文件绕过获取相关信息并植入木马，最终获取webshell。通常linux系统中存放路径为/tmp/sess_[当前会话session值]。
+
+### 访问文件
+
+访问`http://x.x.x.x:8080/index.php?target=db_sql.php%253f/../../../../../../../../flag`，可见`flag`被读取，说明文件包含漏洞存在
+
 
 
 #  2.SQL注入
@@ -705,19 +741,105 @@ function getFlag(){
 
 然后传入cmd参数
 
-## 3.escapeshellarg || escapeshellcmd
+## 4.escapeshellarg || escapeshellcmd
 
 escapeshellarg 将字符串转码为可以在shell命令中使用的参数，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用
 
 escapeshellcmd对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。 此函数保证用户输入的数据在传送到 exec() 或 system() 函数，或者 执行操作符 之前进行转义。
 
-- [ ] 传入的参数是：172.17.0.2<font color=red>**'**</font> -v -d a=1
+- 传入的参数是：172.17.0.2<font color=red>**'**</font> -v -d a=1
+- 经过escapeshellarg处理后变成了<font color=pink>**'**</font>>172.17.0.2<font color=pink>**'**</font><font color=red>**\\'**</font><font color=blue>**'** </font>>-v -d a=1<font color=blue>**'**</font>>，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用。
+- 经过escapeshellcmd处理后变成'172.17.0.2'\\\\'' -v -d a=1\'，这是因为escapeshellcmd对\以及最后那个不配对儿的引号进行了转义：http://php.net/manual/zh/function.escapeshellcmd.php
+- 最后执行的命令是curl '172.17.0.2'\\\\'' -v -d a=1\'，由于中间的\\被解释为\而不再是转义字符，所以后面的'没有被转义，与再后面的'配对儿成了一个空白连接符。所以可以简化为curl 172.17.0.2\ -v -d a=1'，即向172.17.0.2\发起请求，POST 数据为a=1'。
 
-- [ ] 经过escapeshellarg处理后变成了<font color=pink>**'**</font>>172.17.0.2<font color=pink>**'**</font><font color=red>**\\'**</font><font color=blue>**'** </font>>-v -d a=1<font color=blue>**'**</font>>，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用。
 
-- [ ] 经过escapeshellcmd处理后变成'172.17.0.2'\\\\'' -v -d a=1\'，这是因为escapeshellcmd对\以及最后那个不配对儿的引号进行了转义：http://php.net/manual/zh/function.escapeshellcmd.php
 
-- [ ] 最后执行的命令是curl '172.17.0.2'\\\\'' -v -d a=1\'，由于中间的\\被解释为\而不再是转义字符，所以后面的'没有被转义，与再后面的'配对儿成了一个空白连接符。所以可以简化为curl 172.17.0.2\ -v -d a=1'，即向172.17.0.2\发起请求，POST 数据为a=1'。
+
+
+## 5.intvla函数
+
+### 1.用法
+
+int intval( $var, $base )
+
+- $var：需要转换成 integer 的「变量」
+- $base：转换所使用的「进制」
+
+### 2.进制自动转换
+
+当 base 为空时，默认值是 0，会根据 $var 的格式来调整转换的进制。
+
+- 如果 $var 以 0 开头，就使用 8进制
+- 如果 $var 以0x开头，就使用 16进制
+- 否则，就使用 10进制
+
+<font color=red>**绕过思路：当某个数字被过滤时，可以使用它的 8进制/16进制来绕过。**</font>
+
+### 3.转换数组
+
+转换数组类型时，不关心数组中的内容，只判断数组中有没有元素。
+
+- 「空数组」返回 0
+- 「非空数组」返回 1
+
+如果传入的 $var是数组中的某个值时，则当做变量来转换，而不是当做数组类型。
+
+```php
+$arr1 = array(8,6);
+
+var_dump(intval($arr1[0]));
+```
+
+输出8
+
+<font color=red>**绕过思路：对于弱比较（a==b），可以给a、b两个参数传入空数组，使弱比较为true。**</font>
+
+### 4.转换小数
+
+intval() 转换小数类型时，只返回个位数，不遵循四舍五入的原则。
+
+<font color=red>**绕过思路：当某个数字被过滤时，可以给它增加小数位来绕过。**</font>
+
+### 5.转换字符串
+
+intval() 转换字符串类型时，会判断字符串是否以数字开头
+
+- 如果以数字开头，就返回1个或多个连续的数字
+- 如果以字母开头，就返回0
+
+单双引号对转换结果没有影响，并且 0 或 0x 开头也只会当做普通字符串处理。
+
+### 6.取反~
+
+```php
+var_dump(intval(~10));
+var_dump(intval(~~10));
+```
+
+输出-10
+
+10
+
+<font color=red>**绕过思路：当某个数字被过滤时，可以两次取反来绕过。**</font>
+
+
+
+### 7.算数运算符
+
+先运算再转换
+
+```php
+var_dump(intval(100e1));
+var_dump(intval(100e2));
+```
+
+输出100
+
+10000
+
+<font color=red>**绕过思路：当某个数字被过滤时，可以使用算数运算符绕过。**</font>
+
+
 
 # 4.源码泄露
 
@@ -731,5 +853,46 @@ dirsearch扫描目录 发现/.git/下有源码泄露
 
 python GitHack.py url../.git/
 
+## 2.SVN
 
+  python SvnHack.py -u url
 
+## 3.DS_Store
+
+## 4.composer.json
+
+## 5.搜索关键字
+
+GITHUB资源搜索：
+
+in:name test        #仓库标题搜索含有关键字 
+
+in:descripton test     #仓库描述搜索含有关键字 
+
+in:readme test       #Readme文件搜素含有关键字 
+
+stars:>3000 test      #stars数量大于3000的搜索关键字 
+
+stars:1000..3000 test    #stars数量大于1000小于3000的搜索关键字 forks:>1000 test      #forks数量大于1000的搜索关键字 
+
+forks:1000..3000 test    #forks数量大于1000小于3000的搜索关键字 size:>=5000 test      #指定仓库大于5000k(5M)的搜索关键字 pushed:>2019-02-12 test   #发布时间大于2019-02-12的搜索关键字 created:>2019-02-12 test  #创建时间大于2019-02-12的搜索关键字 user:test          #用户名搜素 
+
+license:apache-2.0 test   #明确仓库的 LICENSE 搜索关键字 language:java test     #在java语言的代码中搜索关键字 
+
+user:test in:name test   #组合搜索,用户名test的标题含有test的
+
+关键字配合谷歌搜索：
+
+site:Github.com smtp  
+
+site:Github.com smtp @qq.com  
+
+site:Github.com smtp @126.com  
+
+site:Github.com smtp @163.com  
+
+site:Github.com smtp @sina.com.cn 
+
+site:Github.com smtp password 
+
+site:Github.com String password smtp

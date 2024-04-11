@@ -86,7 +86,7 @@ mode为'r'或'w' 无回显，读出后输出
 
 大括号{ls,-l}
 
-$IFS代替空格 $IFS、$IFS2、$IFS9、${IFS}
+$IFS代替空格 $IFS、$IFS&2、$IFS9、${IFS}
 
 重定向字符< , <>
 
