@@ -839,7 +839,9 @@ var_dump(intval(100e2));
 
 <font color=red>**绕过思路：当某个数字被过滤时，可以使用算数运算符绕过。**</font>
 
+## 6.preg_match函数绕过
 
+反斜杠绕过：l\s
 
 # 4.源码泄露
 
