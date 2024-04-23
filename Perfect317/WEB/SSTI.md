@@ -60,3 +60,52 @@ if__name__=='__main__':
  	app.run('host=0.0.0.0') #可以让局域网内的都访问到 
 ```
 
+##  3.模板介绍
+
+render_template：加载HTML文件。默认文件路径在templates目录下
+
+![image-20240423201130061](../images/image-20240423201130061.png)
+
+render_template_string:用于渲染字符串，直接定义内容
+
+![image-20240423201307047](../images/image-20240423201307047.png)
+
+# 3.Flask漏洞
+
+![image-20240423203613269](../images/image-20240423203613269.png)
+
+## 继承关系
+
+```python
+class A:pass
+class B(A):pass
+class C(B):pass
+class D(B):pass
+c=C()
+print(c.__class__) #<class '__main__.C'>
+print(c.__class__.__base__) #<class '__main__.B'>
+print(c.__class__.base__.__base__) #<class '__main__.A'>
+print(c.__class__.__mro__) #(<class '__main__.C'>, <class '__main__.B'>, <class '__main__.A'>, <class 'object'>)
+print(c.__class__.__base__.__subclasses__()) #[<class '__main__.C'>, <class '__main__.D'>]
+print(c.__class__.__base__.__subclasses__()[1])#<class '__main__.D'>
+```
+
+_\_class__:查看当前类型的所属对象
+
+_\_base__:查看当前对象的父类
+
+_\_mro__::查看当前对象的所有父类
+
+_\_subclassses__()：查看当前父类下的所有子类
+
+_\_subclassses__()[1]：查看当前父类下的第二个子类，0表示第一个
+
+_\_init__:查看是否重载，重载是指程序在运行时就已经加载好了这个模块到内存中，如果出现wrapper字眼，说明没有重载
+
+_\_globals__:返回当前对象的全部全局变量
+
+_\_builtins__:提供对Python的所有内置标识符的直接访问
+
+eval()计算字符串表达式的值
+
+popen()：执行一个shell以运行命令来开启一个进程

