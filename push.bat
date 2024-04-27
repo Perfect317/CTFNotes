@@ -1,3 +1,3 @@
 git add .
-git commit -m "SSTI update"
+git commit -m "update new markdown file"
 git push
