@@ -1,3 +1,3 @@
 git add .
-git commit -m "update new markdown file"
+git commit -m "update pikachu & WEB & SSTI"
 git push

