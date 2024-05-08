@@ -150,8 +150,6 @@ ARCHPR导入已知明文压缩包和加密压缩包，很多题目需要使用�
 
 
 
-
-
 flag.vmdk可用7z解压，lunix下解压命令：7z  x flag.vmdk -o./
 
 
@@ -159,3 +157,7 @@ flag.vmdk可用7z解压，lunix下解压命令：7z  x flag.vmdk -o./
 # 无线路由器备份文件
 
 routerpassview可通过备份文件查看用户名和密码，备份文件后缀为bin，一般flag为用户名或密码
+
+# 冰蝎流量分析
+
+默认密码reboyond

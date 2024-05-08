@@ -248,3 +248,38 @@ block[0]字段的HEAD_FLAGS字段中，字段PASSWord_ENCRYPTED占1比特，将�
 
 \u4e00/u95ea
 
+# 8.邮件安全
+
+**SPF 和 DKIM 相互配合，可以告诉接收服务器允许和拒绝哪些电子邮件；DMARC 告诉它如何处理未通过身份验证的电子邮件；除此之外，DMARC 记录还会向 DMARC 记录中指定的电子邮件地址发送报告，其中包含域收到的电子邮件的数据。**
+
+查询域名
+
+使用 dig 命令查询 foobar-edu-cn.com 的 TXT 记录:
+
+```
+dig +short TXT foobar-edu-cn.com
+```
+
+查询 SPF 记录:
+
+使用 dig 命令查询 spf.foobar-edu-cn.com 的 TXT 记录:
+
+```
+dig +short TXT spf.foobar-edu-cn.com
+```
+
+查询 DKIM 记录:
+
+使用 dig 命令查询 default._domainkey.foobar-edu-cn.com 的 TXT 记录:
+
+```
+dig +short TXT default._domainkey.foobar-edu-cn.com
+```
+
+查询 DMARC 记录:
+
+使用 dig 命令查询 _dmarc.foobar-edu-cn.com 的 TXT 记录:
+
+```
+dig +short TXT _dmarc.foobar-edu-cn.com
+```
