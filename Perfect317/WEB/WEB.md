@@ -115,7 +115,7 @@ php://filter/resource=index.php
 
 #### data命令
 
-text=data://text:text/plain,+内容
+text=data://text:text/plain,内容
 
 
 
@@ -146,7 +146,7 @@ PHP：php4、php5、phtml
 JSP：jspx、jspf
 ```
 
-## 2.一句话木马
+## 5.一句话木马
 
  方便绕过开头可以加上GIF89a gif的文件头
 
@@ -226,7 +226,7 @@ GIF89a
 
 auto_prepend_file=b.gif //文件名为之前上传的一句话木马文件
 
-## 5.网站源码备份文件
+## 6.网站源码备份文件
 
 常见的网站源码备份文件后缀:
 
@@ -246,7 +246,7 @@ python dirsearch.py -e bak,zip,tgz,txt,php -u https://target -t 30
 
 扫描指定后缀名的文件
 
-## 6.过滤绕过 RCE漏洞
+## 7.过滤绕过 RCE漏洞
 
 ### 1.与RCE相关的危险函数 
 
@@ -282,7 +282,7 @@ chr（47）是/的ASCII编码，因为/被过滤了
 
 exp=highlight_file(next(array_reverse(scandir(pos(localeconv())))))
 
-## 7.get传数组
+## 8.get传数组
 
 GET http://localhost:8080/users?roleIds=1&roleIds=2
 
@@ -292,7 +292,7 @@ GET http://localhost:8080/users?roleIds[]=1&roleIds[]=2
 
 GET http://localhost:8080/users?roleIds=1,2
 
-## 8.请求头
+## 9.请求头
 
 User-Agent：标识客户端使用的浏览器和操作系统信息。可以通过$_SERVER['HTTP_USER_AGENT']获取。
 
@@ -347,7 +347,7 @@ session是认证用户身份的凭证
 
 
 
-## 9.Tornado
+## 10.Tornado
 
 Cookies和secure cookies
 
@@ -361,7 +361,7 @@ Cookies和secure cookies
 
 使用·{{}}访问
 
-## 10.WEB_INF
+## 11.WEB_INF
 
 WEB-INF是java的WEB应用的安全目录。
 
@@ -423,7 +423,7 @@ dump class文件进行反编译。
 
 ![image-20240331231416487](../images/image-20240331231416487.png)
 
-## 11.nmap端口扫描
+## 12.nmap端口扫描
 
 nmap是一款非常强大的主机发现和端口扫描工具，而且nmap运用自带的脚本，还能完成漏洞检测，同时支持多平台。
 
@@ -585,13 +585,13 @@ iR                                                                随机选择�
 
 原文链接：https://blog.csdn.net/smli_ng/article/details/105964486
 
-## 12.目录扫描
+## 13.目录扫描
 
 dirseach 
 
 dirsearch -u url
 
-## 13.XXE漏洞
+## 14.XXE漏洞
 
 ```xml
 <?xml version = "1.0"?>
@@ -611,7 +611,7 @@ dirsearch -u url
 <user><username>&admin;</username><password> admin</password></user> 
 ```
 
-## 14.phpmyadmin 4.8.1 远程文件包含漏洞
+## 15.phpmyadmin 4.8.1 远程文件包含漏洞
 
 总结：
 
@@ -623,7 +623,7 @@ dirsearch -u url
 
 
 
-## 15.变量覆盖
+## 16.变量覆盖
 
 ```php
 if($_SESSION){
@@ -643,7 +643,7 @@ extract()函数从数组中将变量导入到当前符号表
 
 ![](../images/image-20240422224528123.png)
 
-## 16.http方法
+## 17.http方法
 
 - **GET**：请求从服务器获取指定资源。这是最常用的方法，用于访问页面。
 - **POST**：请求服务器接受并处理请求体中的数据，通常用于表单提交。
@@ -656,11 +656,29 @@ extract()函数从数组中将变量导入到当前符号表
 - **4xx（客户端错误状态码）**：表示请求包含语法错误或无法完成。
 - **5xx（服务器错误状态码）**：服务器在处理请求的过程中发生了错误。
 
+## 18.软连接
+
+**可以将某个目录连接到另一个目录或者文件下，那么我们以后对这个目录的任何操作，都会作用到另一个目录或者文件下。**
+
+用法：
+
+ln -s  [源文件]  [软链接文件]
+
+ln -s /bin/less /usr/local/bin/less
+
+## 19.jwt
+
+header.payload.signature
+
+爆破秘钥使用jwtcracker（在wsl中）
+
+用法 ./jwtcrack <jwt>
+
 #  2.SQL注入
 
 ## 1.过滤
 
-1.空格过滤使用括号绕过
+1.空格过滤使用括号绕过或者时候/**/
 
 2.and过滤使用^连接
 

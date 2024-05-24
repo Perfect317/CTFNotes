@@ -16,9 +16,9 @@
 10. 摩斯码  
 11. JSfuck编码  
 12. Brainfuck编码  
-![ea1f8be5274db1f27a072176fc48c15](../images/ea1f8be5274db1f27a072176fc48c15-1712731334784-4.jpg)
+![ea1f8be5274db1f27a072176fc48c15](images/ea1f8be5274db1f27a072176fc48c15-1712731334784-4.jpg)
 
-![380457a855f2d114280509eae423e6a](../images/380457a855f2d114280509eae423e6a.jpg)
+![380457a855f2d114280509eae423e6a](images/380457a855f2d114280509eae423e6a.jpg)
 
 ## 2.解码工具
 
@@ -138,7 +138,7 @@ Rx Packets： 接受的数据包数  Rxbytes：  接受的字节数
 | .zip            | 50 4B 03 04                                                  |
 | .rar            | 52 61 72 21                                                  |
 | .doc <br > .xls | D0 CF 11 E0                                                  |
-|                 | ![image-20240309204553793](../images/image-20240309204553793.png) |
+|                 | ![image-20240309204553793](images/image-20240309204553793.png) |
 
 直接使用kali中file命令也可以
 

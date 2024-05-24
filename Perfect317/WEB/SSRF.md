@@ -30,7 +30,7 @@ http://172.250.250.1/$index$.php
 
 ### 1.get提交
 
-![image-20240401151236777](../images/image-20240401151236777.png)
+![image-20240401151236777](images/image-20240401151236777.png)
 
 #### 1.直接提交
 
@@ -51,11 +51,11 @@ gopher://172.250.250.4:80/_GET%20/name.php%3fname=benben%20HTTP/1.1%0d%0AHost:%2
 
 提交：gopher://172.250.250.4:80/_
 
-BurpSuite抓包：![image-20240401154607421](../images/image-20240401154607421.png)
+BurpSuite抓包：![image-20240401154607421](images/image-20240401154607421.png)
 
 把构造的代码粘贴在url后面，做两次URL编码进行提交
 
-![image-20240401164505250](../images/image-20240401164505250.png)
+![image-20240401164505250](images/image-20240401164505250.png)
 
 ### 2.post提交
 
@@ -159,7 +159,7 @@ Content-Length: 131
 
 SSRF需要两次URL编码 
 
-![image-20240407203908192](../images/image-20240407203908192.png)
+![image-20240407203908192](images/image-20240407203908192.png)
 
 ### gopher提交
 
