@@ -64,15 +64,15 @@ if__name__=='__main__':
 
 render_template：加载HTML文件。默认文件路径在templates目录下
 
-![image-20240423201130061](../images/image-20240423201130061.png)
+![image-20240423201130061](./images/image-20240423201130061.png)
 
 render_template_string:用于渲染字符串，直接定义内容
 
-![image-20240423201307047](../images/image-20240423201307047.png)
+![image-20240423201307047](./images/image-20240423201307047.png)
 
 # 3.Flask漏洞
 
-![image-20240423203613269](../images/image-20240423203613269.png)
+![image-20240423203613269](./images/image-20240423203613269.png)
 
 ## 继承关系
 

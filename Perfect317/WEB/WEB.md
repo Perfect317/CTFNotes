@@ -94,7 +94,7 @@ ffifdyop 这个字符串被 md5 哈希了之后会变成 276f722736c95d99e921722
 
 #### file函数
 
-![img](../images/20210110135324804.png)
+![img](/images/20210110135324804.png)
 
 1.是格式
 2.是可选参数，有read和write，字面意思就是读和写
@@ -208,9 +208,9 @@ php.ini是php的一个全局配置文件，对整个web服务起作用；而.use
 
 上传.htaccess，需要将文件格式改为 image/jpeg
 
-![image-20240325201351205](../images/image-20240325201351205.png)
+![image-20240325201351205](./images/image-20240325201351205.png)
 
-![image-20240325201413233](../images/image-20240325201413233.png)
+![image-20240325201413233](./images/image-20240325201413233.png)
 
 上传.htaccess中识别的文件
 
@@ -419,9 +419,9 @@ dump class文件进行反编译。
 
 找到flag文件，通过目录下载
 
-![image-20240331231324888](../images/image-20240331231324888.png)
+![image-20240331231324888](/images/image-20240331231324888.png)
 
-![image-20240331231416487](../images/image-20240331231416487.png)
+![image-20240331231416487](./images/image-20240331231416487.png)
 
 ## 12.nmap端口扫描
 
@@ -641,7 +641,7 @@ extract()函数从数组中将变量导入到当前符号表
 
 当我们传入SESSION[flag]=123时，$SESSION["user"]和$SESSION['function'] 全部会消失。只剩下_SESSION[flag]=123。
 
-![](../images/image-20240422224528123.png)
+![](./images/image-20240422224528123.png)
 
 ## 17.http方法
 
@@ -684,7 +684,7 @@ header.payload.signature
 
 3.等号过滤使用like
 
-4.union select过滤 使用union/**/select
+
 
 ## 2.技巧
 
