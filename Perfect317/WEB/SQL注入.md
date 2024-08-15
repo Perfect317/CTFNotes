@@ -34,6 +34,8 @@
 
 ## 2.盲注
 
+### sql内置函数
+
 %在sql中统配N个字符
 
 _:统配一个字符
@@ -58,11 +60,35 @@ $：匹配字符串的结束。
 \s：匹配一个空白字符。
 ```
 
+
+
 HAVING 子句允许指定条件来过滤将出现在最终结果中的分组结果。
 
 WHERE 子句在所选列上设置条件，而 HAVING 子句则在由 GROUP BY 子句创建的分组上设置条件。
 
 where被过滤时还可以使用right/left/inner join 
+
+
+
+盲注时数字被过滤，在js中数字几就是几个true
+
+```
+def createNum(n):
+    num = 'true'
+    if n == 1:
+        return 'true'
+    else:
+        for i in range(n - 1):
+            num += "+true"
+    return num
+   
+```
+
+
+
+BENCHMARK函数 用来测试数据库中特定表达式的执行时间，
+
+BENCHMARK(loop_count, expr)，其中loop_count是循环次数，expr是要循环的表达式。
 
 # 2.过滤
 
@@ -175,4 +201,38 @@ select id,username,password from ctfshow_user where username != 'flag' and id = 
 
 select id,username,password from ctfshow_user where username != 'flag' and id = '0'or(id=26)and'1' limit 1;
 ```
+
+## 6.md5($str,true)类型绕过
+
+源码：
+
+```php
+<?php
+        $flag="";
+		$password=$_POST['password'];
+		if(strlen($password)>10){
+			die("password error");
+		}
+		$sql="select * from user where username ='admin' and password ='".md5($password,true)."'";
+		$result=mysqli_query($con,$sql);
+			if(mysqli_num_rows($result)>0){
+					while($row=mysqli_fetch_assoc($result)){
+						 echo "登陆成功<br>";
+						 echo $flag;
+					 }
+			}
+    ?>
+
+
+```
+
+在mysql里面，在用作布尔型判断时，以数字开头的字符串会被当做整型数。要注意的是这种情况是必须要有单引号括起来的，比如password=‘xxx’ or ‘1xxxxxxxxx’，那么就相当于password=‘xxx’ or 1 ，也就相当于password=‘xxx’ or true，所以返回值就是true。
+
+想办法将内容转换为
+
+```
+SELECT * FROM admin WHERE pass=’ ‘or ’ 6’
+```
+
+ ffifdyop、129581926211651571912466741651878684928这两个字符串经过md5(password,true)之后，首位是数字
 

@@ -90,48 +90,6 @@ ffifdyop 这个字符串被 md5 哈希了之后会变成 276f722736c95d99e921722
 
 0e215962017
 
-## 3.php伪协议
-
-#### file函数
-
-![img](/images/20210110135324804.png)
-
-1.是格式
-2.是可选参数，有read和write，字面意思就是读和写
-3.是过滤器。主要有四种：字符串过滤器，转换过滤器，压缩过滤器，加密过滤器。filter里可以用一或多个过滤器（中间用|隔开），这也为解题提供了多种方法，灵活运用过滤器是解题的关键。这里的过滤器是把文件flag.php里的代码转换（convert）为base64编码（encode）
-4.是必选参数，后面写你要处理的文件名
-
-php://filter/read=convert.base64-encode/resource=index.php
-
-php://filter/convert.base64-encode/resource=index.php
-
-在绕过一些WAF时有用
-
-
-
-php://filter/resource=index.php
-
-
-
-#### data命令
-
-text=data://text:text/plain,内容
-
-
-
-file:// — 访问本地文件系统
-http:// — 访问 HTTP(s) 网址
-ftp:// — 访问 FTP(s) URLs
-php:// — 访问各个输入/输出流（I/O streams）
-zlib:// — 压缩流
-data:// — 数据（RFC 2397）
-glob:// — 查找匹配的文件路径模式
-phar:// — PHP 归档
-ssh2:// — Secure Shell 2
-rar:// — RAR
-ogg:// — 音频流
-expect:// — 处理交互式的流
-
 ## 4.文件上传漏洞
 
 ### 1. 绕过思路
@@ -144,6 +102,8 @@ ASPX：ashx、asmx、ascx、esms
 PHP：php4、php5、phtml
 
 JSP：jspx、jspf
+
+复写绕过:pphphp
 ```
 
 ## 5.一句话木马
@@ -246,41 +206,7 @@ python dirsearch.py -e bak,zip,tgz,txt,php -u https://target -t 30
 
 扫描指定后缀名的文件
 
-## 7.过滤绕过 RCE漏洞
 
-### 1.与RCE相关的危险函数 
-
- eval()  将字符串当作php代码执行
- assert()  将字符串当作php代码执行
- preg_replace()  将字符串正则匹配后替换
- call_user_func()  回调函数
- array_map()   回调函数
-
-
-
-使用print_r()进行输出
-
-使用readfile()或highlight_file()读取文件
-
-highlight_file() 函数对文件进行语法高亮显示，本函数是show_source() 的别名
-
-next() 输出数组中的当前元素和下一个元素的值。
-
-array_reverse() 函数以相反的元素顺序返回数组。(主要是能返回值)
-
-scandir() 函数返回指定目录中的文件和目录的数组。
-
-pos() 输出数组中的当前元素的值。
-
-localeconv() 函数返回一个包含本地数字及货币格式信息的数组，该数组的第一个元素就是"."。
-
-scandir（）用来获取目录文件
-
-chr（47）是/的ASCII编码，因为/被过滤了
-
-
-
-exp=highlight_file(next(array_reverse(scandir(pos(localeconv())))))
 
 ## 8.get传数组
 

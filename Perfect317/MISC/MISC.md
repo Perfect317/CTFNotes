@@ -244,6 +244,48 @@ block[0]字段的HEAD_FLAGS字段中，字段PASSWord_ENCRYPTED占1比特，将�
 
 已知一个ZIP压缩包中某个文件的源文件，利用已知文件和其压缩加密后的数据获取到压缩包的解压密码。
 
+### 解密
+
+解密这里也有两个函数**fcrackzip** 和 **john**
+
+**fcrackzip** -b -c 1 -l 4-4 -u [文件名]
+
+-b是暴力破解
+
+-c 1 使用字符集，1指数字集合
+
+-l 4-4 最短长度4，最长长度4 
+
+-u 后面是文件名
+
+**john**
+
+john需要先获得中间hash文件
+
+zip2john passwd.zip > passwd.hash
+
+rar2john passwd.zip > passwd.hash
+
+获得hash文件，破解hash文件
+
+john passwd.hash
+
+得的破解后的密码打开4number.txt即可得到flag
+
+
+
+使用字典破解：john -w:password.txt xxx.hash
+
+john --wordlist:password.txt xxx.hash
+
+
+
+如果是word文件
+
+office2john ppt.pptx >ppt.hash
+
+
+
 # 7.unicode编码
 
 \u4e00/u95ea
